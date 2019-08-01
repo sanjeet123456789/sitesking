@@ -1,0 +1,35 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<IFModule mod_rewrite.c>
+RewriteEngine On
+Rewritecond %{SERVER_PORT} 80
+RewriteRule ^(.*)$ https://www.goosefile.com/$1 [R,L]
+</IfModule>

@@ -1,0 +1,428 @@
+
+<?php
+
+//fetch_data.php
+
+// /* start of getting user gwtting os */
+
+// $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+// function getOS() { 
+
+//     global $user_agent;
+
+//     $os_platform  = "Unknown OS Platform";
+
+//     $os_array     = array(
+//                           '/windows nt 10/i'      =>  '1',
+//                           '/windows nt 6.3/i'     =>  '1',
+//                           '/windows nt 6.2/i'     =>  '1',
+//                           '/windows nt 6.1/i'     =>  '1',
+//                           '/windows nt 6.0/i'     =>  '1',
+//                           '/windows nt 5.2/i'     =>  '1',
+//                           '/windows nt 5.1/i'     =>  '1',
+//                           '/windows xp/i'         =>  '1',
+//                           '/windows nt 5.0/i'     =>  '1',
+//                           '/windows me/i'         =>  '1',
+//                           '/win98/i'              =>  '1',
+//                           '/win95/i'              =>  '1',
+//                           '/win16/i'              =>  '1',
+//                           '/macintosh|mac os x/i' =>  '1',
+//                           '/mac_powerpc/i'        =>  'Mac OS 9',
+//                           '/linux/i'              =>  'Linux',
+//                           '/ubuntu/i'             =>  'Ubuntu',
+//                           '/iphone/i'             =>  'iPhone',
+//                           '/ipod/i'               =>  'iPod',
+//                           '/ipad/i'               =>  'iPad',
+//                           '/android/i'            =>  'Android',
+//                           '/blackberry/i'         =>  'BlackBerry',
+//                           '/webos/i'              =>  'Mobile'
+//                     );
+
+//     foreach ($os_array as $regex => $value)
+//         if (preg_match($regex, $user_agent))
+//             $os_platform = $value;
+
+//     return $os_platform;
+// }
+
+// function getBrowser() {
+
+//     global $user_agent;
+
+//     $browser        = "Unknown Browser";
+
+//     $browser_array = array(
+//                             '/msie/i'      => 'Internet Explorer',
+//                             '/firefox/i'   => 'Firefox',
+//                             '/safari/i'    => 'Safari',
+//                             '/chrome/i'    => 'Chrome',
+//                             '/edge/i'      => 'Edge',
+//                             '/opera/i'     => 'Opera',
+//                             '/netscape/i'  => 'Netscape',
+//                             '/maxthon/i'   => 'Maxthon',
+//                             '/konqueror/i' => 'Konqueror',
+//                             '/mobile/i'    => 'Handheld Browser'
+//                      );
+
+//     foreach ($browser_array as $regex => $value)
+//         if (preg_match($regex, $user_agent))
+//             $browser = $value;
+
+//     return $browser;
+// }
+
+
+// $user_os        = getOS();
+// $user_browser   = getBrowser();
+
+
+// // echo("<br /><br /><br />".$_SERVER['HTTP_USER_AGENT']."");
+
+/* end of getting user operating system*/
+$connect = new PDO("mysql:host=localhost;dbname=goosefil_goosefile", "goosefil_pal", "Sitesking@12");
+if(isset($_POST["action"]) and isset($_POST["term"]))
+{ 
+
+
+  $term=$_POST['term'];
+if (!empty($term)) {
+$term = explode(" ", $_POST['term']);
+ $query = "
+  SELECT * FROM software_list WHERE (name like '%$term[0]%' or Tags like '%$term[0]%'  and id IN (
+    SELECT MAX(id)
+    FROM software_list
+    GROUP BY version_control
+) 
+ ";
+
+ for($i = 1; $i < count($term); $i++) {
+        if(!empty($term[$i])) {
+            $query .= " or  name like '%" . $term[$i] . "%' ";
+        }
+      }
+
+    
+
+$query .=")";
+
+
+
+$category_filter_tag="";
+
+if(isset($_POST["category"]) ){
+echo "<div class='search_filter_tag'>";
+$category_filter_tag = implode("<div class='filter_tag'>".$category_filter_tag."</div> ",$_POST['category']);
+  $category_filter = implode("','", $_POST["category"]);
+
+
+
+// echo $category_filter_tag;
+
+
+
+
+echo "</div>";
+
+
+   $connect = new PDO("mysql:host=localhost;dbname=goosefil_goosefile", "goosefil_pal", "Sitesking@12");
+
+                    $query2 = "SELECT id FROM software_categories where title='$category_filter' and sort_order=1";
+
+					$statement = $connect->prepare($query2);
+                    $statement->execute();
+                    $result = $statement->fetchAll();
+                    $total_row = $statement->rowCount();
+                    if($total_row==0){
+                    	$query .="and itemcategories_id=100000";
+                    }else{ 
+
+		                    foreach($result as $row)
+		                	{
+							$remo=$row['id'];
+							
+		                	
+		                	
+		                	
+		                	
+								$query .= " and itemcategories_id = $remo ";
+		                    }
+                	}
+
+
+
+
+
+  
+   
+   /*echo "on video";*/
+ }
+
+
+ if(isset($_POST['licence'])){
+  $licence_filter = implode("','", $_POST["licence"]);
+
+$connect = new PDO("mysql:host=localhost;dbname=goosefil_goosefile", "goosefil_pal", "Sitesking@12");
+
+                    $query2 = "SELECT id FROM licence where name='$licence_filter'";
+
+					$statement = $connect->prepare($query2);
+                    $statement->execute();
+                    $result = $statement->fetchAll();
+                    $total_row = $statement->rowCount();
+                    if($total_row==0){
+                    	$query .="and licence=100000";
+                    }else{
+
+		                    foreach($result as $row)
+		                	{
+							$remo=$row['id'];
+
+		                	
+		                	
+		                	
+		                	
+								$query .= " and licence = $remo ";
+		                    }
+                	}
+
+
+
+
+
+
+
+ 
+   /*echo "on antivirus";*/
+ }
+ $query .=" order by instr(name, '$term[0]') DESC  ";
+ for($i = 1; $i < count($term); $i++) {
+        if(!empty($term[$i])) {
+            $query .= " ,name like '%" . $term[$i] . "%' desc ";
+        }
+ }
+
+
+
+ if(isset($_POST['popular'])){
+ 	
+ 	$query .= " , views DESC ";
+
+ }
+  if(isset($_POST['recent'])){
+  	$query .= "  , release_date DESC ";
+  }
+if(isset($_POST['size'])){
+  	$query .= " ,size asc  ";
+  }
+  if(isset($_POST['ascending'])){
+  	$query .= "  ,name asc ";
+  }
+  if(isset($_POST['descending'])){
+  	$query .= "  ,name DESC ";
+  }
+
+ 
+ $statement_filter_count = $connect->prepare($query);
+ $statement_filter_count->execute();
+
+ $total_row_filter_count = $statement_filter_count->rowCount();
+
+
+ 
+ if(isset($_POST['per_page_records']) and isset($_POST['setoffset'])){
+ 	$per_page_records= $_POST['per_page_records'];
+ 	$setoffset= $_POST['setoffset'];
+ 	$setoffset2=$setoffset*$per_page_records;
+ 	$per_page_records2=$setoffset*$per_page_records+10;
+
+ 	$query.="limit $setoffset2,$per_page_records2";
+ 	/*echo "page is set";
+ 	echo $setoffset2;
+ 	echo "zzzzz";
+ 	echo $per_page_records2;*/
+ 	
+ }
+
+
+
+
+ $statement = $connect->prepare($query);
+ $statement->execute();
+ $result = $statement->fetchAll();
+ $total_row = $statement->rowCount();
+ $output = '';
+
+
+
+ if($term=='' || $total_row== 0) {
+		echo "<div class='result_found'>0 Result found </div>";
+
+}else{
+
+  
+				$output .='<div class="result_found">'.$total_row_filter_count.' Result Found</div>';
+
+
+
+					function get_licence_name($rum){
+						
+												$licence = $rum;
+												
+
+												switch ($licence) {
+												          case 1:
+                                return "Proprietary";
+                                break;
+                            case 2:
+                                return  "freeware";
+                                break;
+                            case 3:
+                                return "open-source";
+                                break;
+                            case 4:
+                                return "GNU General Public Licence";
+                                break;
+                            case 5:
+                              return "MIT";
+                              break;
+                            case 6:
+                              return "Microsoft Public Licence";
+                              break;
+                            case 7:
+                              return "Mozilla Public Licence";
+                              break;
+                            case 8:
+                              return "PostgreSQL License";
+                              break;
+                            case 9:
+                              return "Apache license";
+                              break;
+                            case 10:
+                              return "Creative Commons Attribution";
+                              break;
+                            case 11:
+                              return "Eclipse Public License";
+                              break;
+                            case 12:
+                              return "The Unlicense";
+                              break;
+                            case 13:
+                              return "University of Illinois/NCSA Open Source License";
+                              break;
+                            case 14:
+                              return "Freemium";
+                              break;
+                            case 15:
+                              return "Adware";
+                              break;
+                            default:
+                              return "other licence";
+												}
+
+						                  	}
+
+
+
+
+		foreach($result as $row) {
+  			
+
+   			/* start of search result content*/
+   			
+
+													
+
+											
+													
+												
+
+										$rum=	$row['licence'];
+										$licence_name=get_licence_name($rum);
+										
+
+
+
+								$output .= '<script> var totaljump= '.$total_row_filter_count.';
+								
+
+								</script>
+
+
+
+								<div class="post_detail_header">
+                          <div class="post_detail_header_image"><a href="software.php?name='.$row['name'].'&id='.$row['id'].'">
+                            <img  src='.$row['thumbnail_link'].' alt="Pineapple">
+                            </a>
+                          </div>
+                          <div class="post_detail_header_right">
+                            <div class="post_detail_header_right_left"> 
+
+							<div class="post_detail_top_button">
+                            <div class="button_side_gap">
+                            
+                            <div class="post_detail_header_title"><a role="link" href="software.php?name='.$row['name'].'&id='.$row['id'].'">
+                              '.$row['name'].'</a>
+                              <span class="post_detail_header_version">
+                              ('. $row['version'].')
+                            </span>
+                            </div>
+                            
+                            <div class="post_detail_header_company_name">By
+                              <a class="link"> '.$row['company_name'].'</a>
+                              <span class="post_detail_header_company_licence">
+                              ('.$licence_name.')
+                              
+                            </span>
+                            </div>
+                            </div>
+                          <div class="button_gap blue-button" >
+                            <button >Download</button>
+                          </div>
+                        </div>
+                            
+                                  <div class="post_detail_heade_company_description"><span class="software_bits">Ratings '.$row['users_rating'].'  </span>
+                                  '.$row['short_description'].'
+                                  </div>
+                            </div>
+                          </div>
+	                     </div>
+	                     <div class="download-button-mobi blue-button">
+                          <button >
+                            download
+                          </button>
+                           
+                         </div>';
+
+
+
+                        
+
+						
+
+
+   			/* end of search result content */
+		}
+
+
+}
+
+
+
+
+
+
+
+
+ 
+
+ echo $output;
+ 
+
+ 
+ 
+}
+$output="NO RESULT FOUND";
+
+}
+?>
