@@ -22,8 +22,8 @@ die();
      // $user=$_POST['c'];
 
       $max_id="SELECT max(id)  as max_id_group FROM community_group"; 
-      foreach ($con->query($max_id) as $rows){
-         $user=$rows['max_id_group']+1;
+      foreach ($con->query($max_id) as $row){
+         $user=$row['max_id_group']+1;
      }
      
      //$filename=basename($_FILES["file"]["name"]);
@@ -36,7 +36,7 @@ die();
 
 
 
-$cat=$_POST['cat'];
+$cat=isset($_POST['cat']) ? $_POST['cat']:"";
 $subcat=$_POST['subcat'];
 $subcat3=$_POST['subcat3'];
 $group_name=$_POST['Field4'];

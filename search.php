@@ -22,7 +22,7 @@ function get_row_count(){
 					if(!$cos){
 						die('Failed to connect');
 					}
-				$sql="SELECT count(*) as rows FROM community WHERE name like '%$term[0]%' ";
+				$sql="SELECT count(*) as row FROM community WHERE name like '%$term[0]%' ";
 					for($i = 1; $i < count($term); $i++) {
         if(!empty($term[$i])) {
             $sql .= " or  name like '%" . $term[$i] . "%' ";
@@ -32,7 +32,7 @@ function get_row_count(){
 				$result=mysqli_query($cos,$sql);
 				if(mysqli_num_rows($result)>0){
 					$row=mysqli_fetch_assoc($result);
-					$list= $row['rows'];
+					$list= $row['row'];
 					
 					return $list;
 				}

@@ -140,6 +140,10 @@ if( !defined('FOO_EXECUTED') ){
       <div class="sidemenu-group  sidemenu-second-group">
               <div onclick="myFunction()" class="dropbtn">Group Invite Link<span  class="dropdown-down-icon"><img src="assets/images/icons/down-arrow-icons.png" class="day-mode-pic"><img src="assets/images/icons/down-arrow-icons.png" class="night-mode-pic"></span></div>
               <div id="myDropdown" class="dropdown-content">
+               <a href="group_invitation.php"> <img src="" ><span style="
+                  padding-top: 15;
+                  padding-left: 8px;
+              ">Add Group Invite</span></a>
               <a href="group_invite.php?cat=1"> <img src="assets/images/icons/whatsapp-icons.png" ><span style="
                   padding-top: 15;
                   padding-left: 8px;
